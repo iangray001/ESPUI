@@ -136,12 +136,13 @@ public:
     ControlColor color;
     bool visible;
     uint16_t parentControl;
+    const char* inlineStyle;
     Control* next;
 
     static constexpr uint16_t noParent = 0xffff;
 
     Control(ControlType type, const char* label, void (*callback)(Control*, int), const String& value,
-        ControlColor color, bool visible = true, uint16_t parentControl = Control::noParent)
+        ControlColor color, bool visible = true, uint16_t parentControl = Control::noParent, const char* inlineStyle = 0)
         : type(type),
           label(label),
           callback(callback),
@@ -149,6 +150,7 @@ public:
           color(color),
           visible(visible),
           parentControl(parentControl),
+          inlineStyle(inlineStyle),
           next(nullptr)
     {
         id = idCounter++;
@@ -226,7 +228,7 @@ public:
 
     uint16_t addControl(ControlType type, const char* label, const String& value = String(""),
         ControlColor color = ControlColor::Turquoise, uint16_t parentControl = Control::noParent,
-        void (*callback)(Control*, int) = nullptr);
+        void (*callback)(Control*, int) = nullptr, const char* inlineStyle = 0);
     bool removeControl(uint16_t id, bool force_reload_ui = false);
 
     // create Elements

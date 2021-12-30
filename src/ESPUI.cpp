@@ -588,9 +588,9 @@ void onWsEvent(
 }
 
 uint16_t ESPUIClass::addControl(ControlType type, const char* label, const String& value, ControlColor color,
-    uint16_t parentControl, void (*callback)(Control*, int))
+    uint16_t parentControl, void (*callback)(Control*, int), const char* inlineStyle) 
 {
-    Control* control = new Control(type, label, callback, value, color, true, parentControl);
+    Control* control = new Control(type, label, callback, value, color, true, parentControl, inlineStyle);
 
     if (this->controls == nullptr)
     {
@@ -974,6 +974,11 @@ void ESPUIClass::jsonDom(AsyncWebSocketClient* client)
         if (control->parentControl != Control::noParent)
         {
             item["parentControl"] = String(control->parentControl);
+        }
+
+        if (control->inlineStyle != 0) 
+        {
+            item["inlineStyle"] = String(control->inlineStyle);
         }
 
         // special case for selects: to preselect an option, you have to add

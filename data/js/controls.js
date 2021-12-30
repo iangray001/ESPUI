@@ -230,6 +230,12 @@ function start() {
     var data = JSON.parse(evt.data);
     var e = document.body;
     var center = "";
+
+    var style = "";
+    if(data.hasOwnProperty('inlineStyle')) {
+      style = ' style="' + data.inlineStyle + '" ';
+    }
+
     switch (data.type) {
       case UI_INITIAL_GUI:
         // Clear current elements
@@ -267,7 +273,7 @@ function start() {
         parent.append(
           "<div id='id" +
             data.id +
-            "' class='two columns card tcenter " +
+            "' " + style + " class='two columns card tcenter " +
             colorClass(data.color) +
             "'>" +
             "<h5>" +
@@ -302,7 +308,7 @@ function start() {
             "</h5><hr/>" +
             "<button id='btn" +
             data.id +
-            "' " +
+            "' " + style + 
             "onmousedown='buttonclick(" +
             data.id +
             ", true)' " +
@@ -336,7 +342,7 @@ function start() {
         parent.append(
           "<div id='id" +
             data.id +
-            "' class='one columns card tcenter " +
+            "' " + style + " class='one columns card tcenter " +
             colorClass(data.color) +
             "'>" +
             "<h5>" +
@@ -373,7 +379,7 @@ function start() {
         parent.append(
           "<div id='id" +
             data.id +
-            "' class='two columns card tcenter " +
+            "' " + style + " class='two columns card tcenter " +
             colorClass(data.color) +
             "'>" +
             "<h5>" +
@@ -488,7 +494,7 @@ function start() {
         parent.append(
           "<div id='id" +
             data.id +
-            "' class='two columns card tcenter card-slider " +
+            "' " + style + " class='two columns card tcenter card-slider " +
             colorClass(data.color) +
             "'>" +
             "<h5>" +
@@ -521,7 +527,7 @@ function start() {
         parent.append(
           "<div id='id" +
             data.id +
-            "' class='two columns card tcenter " +
+            "' " + style + " class='two columns card tcenter " +
             colorClass(data.color) +
             "'>" +
             "<h5>" +
@@ -550,7 +556,7 @@ function start() {
         parent.append(
           "<div id='id" +
             data.id +
-            "' class='two columns card tcenter " +
+            "' " + style + " class='two columns card tcenter " +
             colorClass(data.color) +
             "'>" +
             "<h5>" +
@@ -602,7 +608,7 @@ function start() {
         parent.append(
           "<div id='id" +
             data.id +
-            "' class='two columns card tcenter " +
+            "' " + style + " class='two columns card tcenter " +
             colorClass(data.color) +
             "'>" +
             "<h5>" +
@@ -624,7 +630,7 @@ function start() {
           parent.append(
             "<option id='option" +
               data.id +
-              "' value='" +
+              "' " + style + " value='" +
               data.value +
               "' " +
               data.selected +
@@ -672,7 +678,7 @@ function start() {
         parent.append(
           "<div id='id" +
             data.id +
-            "' class='two columns card tcenter " +
+            "' " + style + " class='two columns card tcenter " +
             colorClass(data.color) +
             "'>" +
             "<h5>" +
@@ -713,7 +719,7 @@ function start() {
         parent.append(
           "<div id='id" +
             data.id +
-            "' class='two columns card tcenter " +
+            "' " + style + " class='two columns card tcenter " +
             colorClass(data.color) +
             "'>" +
             "<h5>" +
@@ -744,7 +750,7 @@ function start() {
         parent.append(
           "<div id='id" +
             data.id +
-            "' class='two columns card tcenter " +
+            "' " + style + " class='two columns card tcenter " +
             colorClass(data.color) +
             "'>" +
             "<h5>" +
