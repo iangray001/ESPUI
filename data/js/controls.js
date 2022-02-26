@@ -206,6 +206,7 @@ function handleVisibilityChange() {
 
 function start() {
   document.addEventListener("visibilitychange", handleVisibilityChange, false);
+  setInterval(function() { handleVisibilityChange(); }, 10000);
   if (
     window.location.port != "" ||
     window.location.port != 80 ||

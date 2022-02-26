@@ -387,7 +387,7 @@ void onWsEvent(
             Serial.print(F("Disconnected!\n"));
         }
 #endif
-
+        ESPUI.server->begin();
         break;
     }
 
