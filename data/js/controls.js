@@ -115,6 +115,10 @@ function colorClass(colorId) {
 
 var websock;
 var websockConnected = false;
+var pingTimeout;
+var pingInterval;
+const pingIntervalMS = 20000;
+var autoReconnectInterval;
 
 function requestOrientationPermission() {
   /*
@@ -189,6 +193,7 @@ function restart() {
 
 function conStatusError() {
   websockConnected = false;
+  clearInterval(pingInterval);
   $("#conStatus").removeClass("color-green");
   $("#conStatus").addClass("color-red");
   $("#conStatus").html("Error / No Connection &#8635;");
@@ -196,6 +201,10 @@ function conStatusError() {
   $("#conStatus").on({
     click: restart,
   });
+
+  autoReconnectInterval = setInterval(function() {
+    if(!websockConnected) restart();
+  }, pingIntervalMS*2);
 }
 
 function handleVisibilityChange() {
@@ -204,9 +213,18 @@ function handleVisibilityChange() {
   }
 }
 
+function sendPing() {
+  websock.send("ping");
+  pingTimeout = setTimeout(() => {
+    console.log("Terminating connection due to ping timeout");
+    websock.close();
+    clearTimeout(pingTimeout);
+    conStatusError();
+  }, pingIntervalMS+1000);
+}
+
 function start() {
   document.addEventListener("visibilitychange", handleVisibilityChange, false);
-  setInterval(function() { handleVisibilityChange(); }, 10000);
   if (
     window.location.port != "" ||
     window.location.port != 80 ||
@@ -223,6 +241,8 @@ function start() {
     $("#conStatus").addClass("color-green");
     $("#conStatus").text("Connected");
     websockConnected = true;
+    clearInterval(autoReconnectInterval);
+    pingInterval = setInterval(sendPing, pingIntervalMS);
   };
 
   websock.onclose = function (evt) {
@@ -236,7 +256,12 @@ function start() {
   };
 
   var handleEvent = function (evt) {
-    console.log(evt);
+    //console.log(evt);
+    if(evt.data.startsWith("pong")) {
+      clearTimeout(pingTimeout);
+      return;
+    }
+
     var data = JSON.parse(evt.data);
     var e = document.body;
     var center = "";

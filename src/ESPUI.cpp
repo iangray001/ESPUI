@@ -442,154 +442,158 @@ void onWsEvent(
             msg += (char)data[i];
         }
 
-        if (msg.startsWith(F("uiok:")))
-        {
-            int idx = msg.substring(msg.indexOf(':') + 1).toInt();
-            ESPUI.jsonDom(idx, client);
-        } else 
-        {
-            uint16_t id = msg.substring(msg.lastIndexOf(':') + 1).toInt();
-
-    #if defined(DEBUG_ESPUI)
-            if (ESPUI.verbosity >= Verbosity::VerboseJSON)
+        if(msg.startsWith(F("ping"))) {
+            client->text("pong");
+        } else {
+            if (msg.startsWith(F("uiok:")))
             {
-                Serial.print(F("WS rec: "));
-                Serial.println(msg);
-                Serial.print(F("WS recognised ID: "));
-                Serial.println(id);
-            }
-    #endif
-
-            Control* c = ESPUI.getControl(id);
-
-            if (c == nullptr)
+                int idx = msg.substring(msg.indexOf(':') + 1).toInt();
+                ESPUI.jsonDom(idx, client);
+            } else 
             {
-    #if defined(DEBUG_ESPUI)
-                if (ESPUI.verbosity)
+                uint16_t id = msg.substring(msg.lastIndexOf(':') + 1).toInt();
+
+        #if defined(DEBUG_ESPUI)
+                if (ESPUI.verbosity >= Verbosity::VerboseJSON)
                 {
-                    Serial.print(F("No control found for ID "));
+                    Serial.print(F("WS rec: "));
+                    Serial.println(msg);
+                    Serial.print(F("WS recognised ID: "));
                     Serial.println(id);
                 }
-    #endif
+        #endif
 
-                return;
-            }
+                Control* c = ESPUI.getControl(id);
 
-            if (c->callback == nullptr)
-            {
-    #if defined(DEBUG_ESPUI)
-                if (ESPUI.verbosity)
+                if (c == nullptr)
                 {
-                    Serial.print(F("No callback found for ID "));
-                    Serial.println(id);
+        #if defined(DEBUG_ESPUI)
+                    if (ESPUI.verbosity)
+                    {
+                        Serial.print(F("No control found for ID "));
+                        Serial.println(id);
+                    }
+        #endif
+
+                    return;
                 }
-    #endif
 
-                return;
-            }
-
-            if (msg.startsWith(F("bdown:")))
-            {
-                c->callback(c, B_DOWN);
-            }
-            else if (msg.startsWith(F("bup:")))
-            {
-                c->callback(c, B_UP);
-            }
-            else if (msg.startsWith(F("pfdown:")))
-            {
-                c->callback(c, P_FOR_DOWN);
-            }
-            else if (msg.startsWith(F("pfup:")))
-            {
-                c->callback(c, P_FOR_UP);
-            }
-            else if (msg.startsWith(F("pldown:")))
-            {
-                c->callback(c, P_LEFT_DOWN);
-            }
-            else if (msg.startsWith(F("plup:")))
-            {
-                c->callback(c, P_LEFT_UP);
-            }
-            else if (msg.startsWith(F("prdown:")))
-            {
-                c->callback(c, P_RIGHT_DOWN);
-            }
-            else if (msg.startsWith(F("prup:")))
-            {
-                c->callback(c, P_RIGHT_UP);
-            }
-            else if (msg.startsWith(F("pbdown:")))
-            {
-                c->callback(c, P_BACK_DOWN);
-            }
-            else if (msg.startsWith(F("pbup:")))
-            {
-                c->callback(c, P_BACK_UP);
-            }
-            else if (msg.startsWith(F("pcdown:")))
-            {
-                c->callback(c, P_CENTER_DOWN);
-            }
-            else if (msg.startsWith(F("pcup:")))
-            {
-                c->callback(c, P_CENTER_UP);
-            }
-            else if (msg.startsWith(F("sactive:")))
-            {
-                c->value = "1";
-                ESPUI.updateControl(c, client->id());
-                c->callback(c, S_ACTIVE);
-            }
-            else if (msg.startsWith(F("sinactive:")))
-            {
-                c->value = "0";
-                ESPUI.updateControl(c, client->id());
-                c->callback(c, S_INACTIVE);
-            }
-            else if (msg.startsWith(F("slvalue:")))
-            {
-                c->value = msg.substring(msg.indexOf(':') + 1, msg.lastIndexOf(':'));
-                ESPUI.updateControl(c, client->id());
-                c->callback(c, SL_VALUE);
-            }
-            else if (msg.startsWith(F("nvalue:")))
-            {
-                c->value = msg.substring(msg.indexOf(':') + 1, msg.lastIndexOf(':'));
-                ESPUI.updateControl(c, client->id());
-                c->callback(c, N_VALUE);
-            }
-            else if (msg.startsWith(F("tvalue:")))
-            {
-                c->value = msg.substring(msg.indexOf(':') + 1, msg.lastIndexOf(':'));
-                ESPUI.updateControl(c, client->id());
-                c->callback(c, T_VALUE);
-            }
-            else if (msg.startsWith("tabvalue:"))
-            {
-                c->callback(c, client->id());
-            }
-            else if (msg.startsWith(F("svalue:")))
-            {
-                c->value = msg.substring(msg.indexOf(':') + 1, msg.lastIndexOf(':'));
-                ESPUI.updateControl(c, client->id());
-                c->callback(c, S_VALUE);
-            }
-            else if (msg.startsWith(F("time:")))
-            {
-                c->value = msg.substring(msg.indexOf(':') + 1, msg.lastIndexOf(':'));
-                ESPUI.updateControl(c, client->id());
-                c->callback(c, TM_VALUE);
-            }
-            else
-            {
-    #if defined(DEBUG_ESPUI)
-                if (ESPUI.verbosity)
+                if (c->callback == nullptr)
                 {
-                    Serial.println(F("Malformated message from the websocket"));
+        #if defined(DEBUG_ESPUI)
+                    if (ESPUI.verbosity)
+                    {
+                        Serial.print(F("No callback found for ID "));
+                        Serial.println(id);
+                    }
+        #endif
+
+                    return;
                 }
-    #endif
+
+                if (msg.startsWith(F("bdown:")))
+                {
+                    c->callback(c, B_DOWN);
+                }
+                else if (msg.startsWith(F("bup:")))
+                {
+                    c->callback(c, B_UP);
+                }
+                else if (msg.startsWith(F("pfdown:")))
+                {
+                    c->callback(c, P_FOR_DOWN);
+                }
+                else if (msg.startsWith(F("pfup:")))
+                {
+                    c->callback(c, P_FOR_UP);
+                }
+                else if (msg.startsWith(F("pldown:")))
+                {
+                    c->callback(c, P_LEFT_DOWN);
+                }
+                else if (msg.startsWith(F("plup:")))
+                {
+                    c->callback(c, P_LEFT_UP);
+                }
+                else if (msg.startsWith(F("prdown:")))
+                {
+                    c->callback(c, P_RIGHT_DOWN);
+                }
+                else if (msg.startsWith(F("prup:")))
+                {
+                    c->callback(c, P_RIGHT_UP);
+                }
+                else if (msg.startsWith(F("pbdown:")))
+                {
+                    c->callback(c, P_BACK_DOWN);
+                }
+                else if (msg.startsWith(F("pbup:")))
+                {
+                    c->callback(c, P_BACK_UP);
+                }
+                else if (msg.startsWith(F("pcdown:")))
+                {
+                    c->callback(c, P_CENTER_DOWN);
+                }
+                else if (msg.startsWith(F("pcup:")))
+                {
+                    c->callback(c, P_CENTER_UP);
+                }
+                else if (msg.startsWith(F("sactive:")))
+                {
+                    c->value = "1";
+                    ESPUI.updateControl(c, client->id());
+                    c->callback(c, S_ACTIVE);
+                }
+                else if (msg.startsWith(F("sinactive:")))
+                {
+                    c->value = "0";
+                    ESPUI.updateControl(c, client->id());
+                    c->callback(c, S_INACTIVE);
+                }
+                else if (msg.startsWith(F("slvalue:")))
+                {
+                    c->value = msg.substring(msg.indexOf(':') + 1, msg.lastIndexOf(':'));
+                    ESPUI.updateControl(c, client->id());
+                    c->callback(c, SL_VALUE);
+                }
+                else if (msg.startsWith(F("nvalue:")))
+                {
+                    c->value = msg.substring(msg.indexOf(':') + 1, msg.lastIndexOf(':'));
+                    ESPUI.updateControl(c, client->id());
+                    c->callback(c, N_VALUE);
+                }
+                else if (msg.startsWith(F("tvalue:")))
+                {
+                    c->value = msg.substring(msg.indexOf(':') + 1, msg.lastIndexOf(':'));
+                    ESPUI.updateControl(c, client->id());
+                    c->callback(c, T_VALUE);
+                }
+                else if (msg.startsWith("tabvalue:"))
+                {
+                    c->callback(c, client->id());
+                }
+                else if (msg.startsWith(F("svalue:")))
+                {
+                    c->value = msg.substring(msg.indexOf(':') + 1, msg.lastIndexOf(':'));
+                    ESPUI.updateControl(c, client->id());
+                    c->callback(c, S_VALUE);
+                }
+                else if (msg.startsWith(F("time:")))
+                {
+                    c->value = msg.substring(msg.indexOf(':') + 1, msg.lastIndexOf(':'));
+                    ESPUI.updateControl(c, client->id());
+                    c->callback(c, TM_VALUE);
+                }
+                else
+                {
+        #if defined(DEBUG_ESPUI)
+                    if (ESPUI.verbosity)
+                    {
+                        Serial.println(F("Malformated message from the websocket"));
+                    }
+        #endif
+                }
             }
         }
     }
