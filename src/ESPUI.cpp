@@ -5,7 +5,8 @@
 #include <ESPAsyncWebServer.h>
 
 #include "dataControlsJS.h"
-#include "dataGraphJS.h"
+#include "dataChartistJS.h"
+#include "dataChartistCSS.h"
 #include "dataIndexHTML.h"
 #include "dataNormalizeCSS.h"
 #include "dataSliderJS.h"
@@ -322,11 +323,12 @@ void ESPUIClass::prepareFileSystem()
 
     deleteFile("/css/style.css");
     deleteFile("/css/normalize.css");
+    deleteFile("/css/chartist.css");
 
     deleteFile("/js/zepto.min.js");
     deleteFile("/js/controls.js");
     deleteFile("/js/slider.js");
-    deleteFile("/js/graph.js");
+    deleteFile("/js/chartist.js");
     deleteFile("/js/tabbedcontent.js");
 
 #if defined(DEBUG_ESPUI)
@@ -341,11 +343,12 @@ void ESPUIClass::prepareFileSystem()
 
     writeFile("/css/style.css", CSS_STYLE);
     writeFile("/css/normalize.css", CSS_NORMALIZE);
+    writeFile("/css/chartist.css", CSS_CHARTIST);
 
     writeFile("/js/zepto.min.js", JS_ZEPTO);
     writeFile("/js/controls.js", JS_CONTROLS);
     writeFile("/js/slider.js", JS_SLIDER);
-    writeFile("/js/graph.js", JS_GRAPH);
+    writeFile("/js/chartist.js", JS_CHARTIST);
 
     writeFile("/js/tabbedcontent.js", JS_TABBEDCONTENT);
 
@@ -680,11 +683,6 @@ uint16_t ESPUIClass::label(const char* label, ControlColor color, const String& 
     return addControl(ControlType::Label, label, value, color);
 }
 
-uint16_t ESPUIClass::graph(const char* label, ControlColor color)
-{
-    return addControl(ControlType::Graph, label, "", color);
-}
-
 uint16_t ESPUIClass::slider(
     const char* label, void (*callback)(Control*, int), ControlColor color, int value, int min, int max)
 {
@@ -977,64 +975,6 @@ void ESPUIClass::updateGauge(uint16_t id, int number, int clientId)
 void ESPUIClass::updateTime(uint16_t id, int clientId) 
 {
     updateControl(id, clientId);
-}
-
-void ESPUIClass::clearGraph(uint16_t id, int clientId) { }
-
-void ESPUIClass::addGraphPoint(uint16_t id, int nValue, int clientId)
-{
-    Control* control = getControl(id);
-    if (!control)
-    {
-        return;
-    }
-
-    String json;
-    DynamicJsonDocument document(jsonUpdateDocumentSize);
-    JsonObject root = document.to<JsonObject>();
-
-    root["type"] = (int)ControlType::GraphPoint;
-    root["value"] = nValue;
-    root["id"] = control->id;
-    serializeJson(document, json);
-
-#if defined(DEBUG_ESPUI)
-    if (this->verbosity >= Verbosity::VerboseJSON)
-    {
-        Serial.println(json);
-    }
-#endif
-
-    if (clientId < 0)
-    {
-        this->ws->textAll(json);
-        return;
-    }
-    // This is a hacky workaround because ESPAsyncWebServer does not have a
-    // function like this and it's clients array is private
-    int tryId = 0;
-
-    for (size_t count = 0; count < this->ws->count();)
-    {
-        if (this->ws->hasClient(tryId))
-        {
-            if (clientId != tryId)
-            {
-                this->ws->client(tryId)->text(json);
-
-#if defined(DEBUG_ESPUI)
-                if (this->verbosity >= Verbosity::VerboseJSON)
-                {
-                    Serial.println(json);
-                }
-#endif
-            }
-
-            count++;
-        }
-
-        tryId++;
-    }
 }
 
 /*
@@ -1359,14 +1299,14 @@ void ESPUIClass::begin(const char* _title, const char* username, const char* pas
         request->send(response);
     });
 
-    server->on("/js/graph.js", HTTP_GET, [](AsyncWebServerRequest* request) {
+    server->on("/js/chartist.js", HTTP_GET, [](AsyncWebServerRequest* request) {
         if (ESPUI.basicAuth && !request->authenticate(ESPUI.basicAuthUsername, ESPUI.basicAuthPassword))
         {
             return request->requestAuthentication();
         }
 
         AsyncWebServerResponse* response
-            = request->beginResponse_P(200, "application/javascript", JS_GRAPH_GZIP, sizeof(JS_GRAPH_GZIP));
+            = request->beginResponse_P(200, "application/javascript", JS_CHARTIST_GZIP, sizeof(JS_CHARTIST_GZIP));
         response->addHeader("Content-Encoding", "gzip");
         request->send(response);
     });
@@ -1405,6 +1345,18 @@ void ESPUIClass::begin(const char* _title, const char* username, const char* pas
 
         AsyncWebServerResponse* response
             = request->beginResponse_P(200, "text/css", CSS_NORMALIZE_GZIP, sizeof(CSS_NORMALIZE_GZIP));
+        response->addHeader("Content-Encoding", "gzip");
+        request->send(response);
+    });
+
+    server->on("/css/chartist.css", HTTP_GET, [](AsyncWebServerRequest* request) {
+        if (ESPUI.basicAuth && !request->authenticate(ESPUI.basicAuthUsername, ESPUI.basicAuthPassword))
+        {
+            return request->requestAuthentication();
+        }
+
+        AsyncWebServerResponse* response
+            = request->beginResponse_P(200, "text/css", CSS_CHARTIST_GZIP, sizeof(CSS_CHARTIST_GZIP));
         response->addHeader("Content-Encoding", "gzip");
         request->send(response);
     });

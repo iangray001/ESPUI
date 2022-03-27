@@ -37,47 +37,44 @@ enum ControlType : uint8_t
     Title = 0,
 
     // updatable controls
-    Pad,
-    PadWithCenter,
-    Button,
-    Label,
-    Switcher,
-    Slider,
-    Number,
-    Text,
-    Graph,
-    GraphPoint,
-    Tab,
-    Select,
-    Option,
-    Min,
-    Max,
-    Step,
-    Gauge,
-    Accel,
-    Separator,
-    Time,
+    Pad = 1,
+    PadWithCenter = 2,
+    Button = 3,
+    Label = 4,
+    Switcher = 5,
+    Slider = 6,
+    Number = 7,
+    Text = 8,
+    Tab = 11,
+    Select = 12,
+    Option = 13,
+    Min = 14,
+    Max = 15,
+    Step = 16,
+    Gauge = 17,
+    Accel = 18,
+    Separator = 19,
+    Time = 20,
 
     UpdateOffset = 100,
     UpdatePad = 101,
-    UpdatePadWithCenter,
-    ButtonButton,
-    UpdateLabel,
-    UpdateSwitcher,
-    UpdateSlider,
-    UpdateNumber,
-    UpdateText,
-    ClearGraph,
-    UpdateTab,
-    UpdateSelection,
-    UpdateOption,
-    UpdateMin,
-    UpdateMax,
-    UpdateStep,
-    UpdateGauge,
-    UpdateAccel,
-    UpdateSeparator,
-    UpdateTime,
+    UpdatePadWithCenter = 102,
+    ButtonButton = 103,
+    UpdateLabel = 104,
+    UpdateSwitcher = 105,
+    UpdateSlider = 106,
+    UpdateNumber = 107,
+    UpdateText = 108,
+    UpdateTab = 111,
+    UpdateSelection = 112,
+    UpdateOption = 113,
+    UpdateMin = 114,
+    UpdateMax = 115,
+    UpdateStep = 116,
+    UpdateGauge = 117,
+    UpdateAccel = 118,
+    UpdateSeparator = 119,
+    UpdateTime = 120,
 
     InitialGui = 200,
     Reload = 201,
@@ -97,15 +94,12 @@ enum ControlType : uint8_t
 #define UI_SLIDER ControlType::Slider
 #define UI_NUMBER ControlType::Number
 #define UI_TEXT_INPUT ControlType::Text
-#define UI_GRAPH ControlType::Graph
-#define UI_ADD_GRAPH_POINT ControlType::GraphPoint
 
 #define UPDATE_LABEL ControlType::UpdateLabel
 #define UPDATE_SWITCHER ControlType::UpdateSwitcher
 #define UPDATE_SLIDER ControlType::UpdateSlider
 #define UPDATE_NUMBER ControlType::UpdateNumber
 #define UPDATE_TEXT_INPUT ControlType::UpdateText
-#define CLEAR_GRAPH ControlType::ClearGraph
 
 // Colors
 enum ControlColor : uint8_t
@@ -265,7 +259,6 @@ public:
     // Output only
     uint16_t label(const char* label, ControlColor color,
         const String& value = ""); // Create Label
-    uint16_t graph(const char* label, ControlColor color); // Create Graph display
     uint16_t gauge(const char* label, ControlColor color, int value, int min = 0,
         int max = 100); // Create Gauge display
     uint16_t separator(const char* label); //Create separator
@@ -294,9 +287,6 @@ public:
     void updateSelect(uint16_t id, const String& nValue, int clientId = -1);
     void updateGauge(uint16_t id, int number, int clientId);
     void updateTime(uint16_t id, int clientId = -1);
-
-    void clearGraph(uint16_t id, int clientId = -1);
-    void addGraphPoint(uint16_t id, int nValue, int clientId = -1);
 
     void setPanelStyle(uint16_t id, String style, int clientId = -1);
     void setElementStyle(uint16_t id, String style, int clientId = -1);

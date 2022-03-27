@@ -30,10 +30,6 @@ const UPDATE_NUMBER = 107;
 const UI_TEXT_INPUT = 8;
 const UPDATE_TEXT_INPUT = 108;
 
-const UI_GRAPH = 9;
-const ADD_GRAPH_POINT = 10;
-const CLEAR_GRAPH = 109;
-
 const UI_TAB = 11;
 const UPDATE_TAB = 111;
 
@@ -77,7 +73,6 @@ const C_ALIZARIN = 6;
 const C_DARK = 7;
 const C_NONE = 255;
 
-var graphData = new Array();
 var hasAccel = false;
 var sliderContinuous = false;
 
@@ -166,19 +161,6 @@ function handleOrientation(event) {
   ball.style.left = (maxX * x) / 180 - 10 + "px";
 }
 */
-
-function saveGraphData() {
-  localStorage.setItem("espuigraphs", JSON.stringify(graphData));
-}
-
-function restoreGraphData(id) {
-  var savedData = localStorage.getItem("espuigraphs", graphData);
-  if (savedData != null) {
-    savedData = JSON.parse(savedData);
-    return savedData[id];
-  }
-  return [];
-}
 
 function restart() {
   $(document).add("*").off();
@@ -467,25 +449,6 @@ function start() {
         }
         break;
 
-      case UI_GRAPH:
-		    if (data.visible) {
-          addToHTML(data);
-          graphData[data.id] = restoreGraphData(data.id);
-          renderGraphSvg(graphData[data.id], "graph" + data.id);
-        }
-        break;
-      case ADD_GRAPH_POINT:
-        var ts = Math.round(new Date().getTime() / 1000);
-        graphData[data.id].push({ x: ts, y: data.value });
-        saveGraphData();
-        renderGraphSvg(graphData[data.id], "graph" + data.id);
-        break;
-      case CLEAR_GRAPH:
-        graphData[data.id] = [];
-        saveGraphData();
-        renderGraphSvg(graphData[data.id], "graph" + data.id);
-        break;
-
       case UI_ACCEL:
         if (hasAccel) break;
         hasAccel = true;
@@ -740,7 +703,6 @@ var addToHTML = function(data) {
       case UI_NUMBER:
       case UI_TEXT_INPUT:
       case UI_SELECT:
-      case UI_GRAPH:
       case UI_GAUGE:
       case UI_ACCEL:
         html = "<div id='id" + data.id + "' " + panelStyle + " class='two columns " + panelwide + " card tcenter " +
@@ -819,8 +781,6 @@ var elementHTML = function(data) {
     case UI_SELECT:
       return "<select style='color:black;' " + elementStyle + " id='select" + id +
         "' onchange='selectchange(" + id + ")' />";
-    case UI_GRAPH:
-      return "<figure id='graph" + id + "'><figcaption>" + data.label + "</figcaption></figure>";
     case UI_GAUGE:
       return "WILL BE A GAUGE <input style='color:black;' id='gauge" + id + 
         "' type='number' value='" + data.value + "' onchange='numberchange(" + id + ")' />";
