@@ -56,6 +56,8 @@ const UPDATE_SEPARATOR = 119;
 const UI_TIME = 20;
 const UPDATE_TIME = 120;
 
+const UI_CHART = 21;
+
 const UP = 0;
 const DOWN = 1;
 const LEFT = 2;
@@ -110,6 +112,7 @@ function colorClass(colorId) {
 
 var websock;
 var websockConnected = false;
+var charts = {}
 
 function requestOrientationPermission() {
   /*
@@ -163,6 +166,7 @@ function handleOrientation(event) {
 */
 
 function restart() {
+  charts = {}
   $(document).add("*").off();
   $("#row").html("");
   websock.close();
@@ -370,6 +374,28 @@ function start() {
 		    if (data.visible) {
           addToHTML(data);
           rangeSlider(!sliderContinuous);
+        }
+        break;
+
+      case UI_CHART:
+		    if (data.visible) {
+          addToHTML(data);
+
+          //The 'value' of a chart is a JSON object
+          /*{
+            type: "line",
+            data: {
+	            labels: ['1', '2', '3', '4', '5'],
+	            series: [[5, 2, 4, 2, 0]]
+	          },
+            options: {}
+          }*/
+          var ct = JSON.parse(data.value);
+          var chartData = ct.hasOwnProperty('data') ? ct.data : "{}";
+          var chartType = ct.hasOwnProperty('type') ? ct.type : "line";
+          var chartOptions = ct.hasOwnProperty('options') ? ct.options : "{}";
+          const initFn = {"line": Chartist.Line, "bar": Chartist.Bar, "pie": Chartist.Pie};
+          charts['ch' + data.id] = new initFn[chartType]('#ch' + data.id, chartData, chartOptions);
         }
         break;
 
@@ -705,6 +731,7 @@ var addToHTML = function(data) {
       case UI_SELECT:
       case UI_GAUGE:
       case UI_ACCEL:
+      case UI_CHART:
         html = "<div id='id" + data.id + "' " + panelStyle + " class='two columns " + panelwide + " card tcenter " +
         colorClass(data.color) + "'><h5>" + data.label + "</h5><hr/>" +
         elementHTML(data) +
@@ -787,6 +814,8 @@ var elementHTML = function(data) {
     case UI_ACCEL:
       return "ACCEL // Not implemented fully!<div class='accelerometer' id='accel" + id +
         "' ><div class='ball" + id + "'></div><pre class='accelerometeroutput" + id + "'></pre>";
+    case UI_CHART:
+      return "<div class='ct-chart' id='ch" + id + "'></div>";
     default:
       return "";
   }

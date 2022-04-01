@@ -55,6 +55,7 @@ enum ControlType : uint8_t
     Accel = 18,
     Separator = 19,
     Time = 20,
+    Chart = 21,
 
     UpdateOffset = 100,
     UpdatePad = 101,
