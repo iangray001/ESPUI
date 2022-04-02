@@ -1198,3 +1198,16 @@ input:disabled {
 .switch.checked.disabled {
   background: #b1d092;
 }
+
+/* Chartist overrides to fit our needs */
+
+.ct-label {
+  font-size: 1.5rem;
+}
+
+.chart-card {
+  padding: 10px 10px 0px 10px;
+  background-color: aliceblue;
+  margin-bottom: 10px;
+  border: 1px solid #999;
+}

@@ -762,12 +762,7 @@ Control* ESPUIClass::getControl(uint16_t id)
 
 void ESPUIClass::updateControl(Control* control, int clientId)
 {
-    if (!control)
-    {
-        return;
-    }
-
-    if (this->ws == nullptr)
+    if (!control || this->ws == nullptr)
     {
         return;
     }
@@ -787,7 +782,61 @@ void ESPUIClass::updateControl(Control* control, int clientId)
     if (control->elementStyle.length())
         root["elementStyle"] = control->elementStyle;
     serializeJson(document, json);
+    sendToClients(json, clientId);
+}
 
+
+void ESPUIClass::chartClear(uint16_t id, int clientId)
+{
+    Control* control = getControl(id);
+    if (control && control->type == ControlType::Chart) 
+    {
+        String json;
+        DynamicJsonDocument document(jsonUpdateDocumentSize);
+        JsonObject root = document.to<JsonObject>();
+        root["type"] = ControlType::ChartClear;
+        root["id"] = control->id;
+        serializeJson(document, json);
+        sendToClients(json, clientId);
+    }
+}
+
+void ESPUIClass::chartAddValue(uint16_t id, const String& value, const String& label, int clientId)
+{
+    Control* control = getControl(id);
+    if (control && control->type == ControlType::Chart) 
+    {
+        String json;
+        DynamicJsonDocument document(jsonUpdateDocumentSize);
+        JsonObject root = document.to<JsonObject>();
+        root["type"] = ControlType::ChartAdd;
+        root["id"] = control->id;
+        root["value"] = value;
+        root["label"] = label;
+        serializeJson(document, json);
+        sendToClients(json, clientId);
+    }
+}
+
+void ESPUIClass::chartSetValue(uint16_t id, uint16_t valueId, const String& value, int clientId)
+{
+    Control* control = getControl(id);
+    if (control && control->type == ControlType::Chart) 
+    {
+        String json;
+        DynamicJsonDocument document(jsonUpdateDocumentSize);
+        JsonObject root = document.to<JsonObject>();
+        root["type"] = ControlType::ChartSet;
+        root["id"] = control->id;
+        root["value"] = value;
+        root["valueid"] = valueId;
+        serializeJson(document, json);
+        sendToClients(json, clientId);
+    }
+}
+
+void ESPUIClass::sendToClients(String& json, int clientId) 
+{
 #if defined(DEBUG_ESPUI)
     if (this->verbosity >= Verbosity::VerboseJSON)
     {
@@ -825,6 +874,8 @@ void ESPUIClass::updateControl(Control* control, int clientId)
         tryId++;
     }
 }
+
+
 
 void ESPUIClass::setPanelStyle(uint16_t id, String style, int clientId)
 {

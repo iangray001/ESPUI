@@ -58,6 +58,12 @@ const UPDATE_TIME = 120;
 
 const UI_CHART = 21;
 
+const MAX_ID_OF_UPDATE_MESSAGES = 179;
+
+const UI_CHART_CLEAR = 180;
+const UI_CHART_ADD = 181;
+const UI_CHART_SET = 182;
+
 const UP = 0;
 const DOWN = 1;
 const LEFT = 2;
@@ -555,6 +561,32 @@ function start() {
         websock.send("time:" + rv + ":" + data.id);
         break;
 
+      case UI_CHART_CLEAR:
+        if(charts.hasOwnProperty('ch' + data.id)) {
+          charts['ch' + data.id].data.labels = [];
+          charts['ch' + data.id].data.series[0] = [];
+          charts['ch' + data.id].update();
+        }
+        break;
+
+      case UI_CHART_ADD:
+        if(charts.hasOwnProperty('ch' + data.id)) {
+          charts['ch' + data.id].data.labels.push(data.label);
+          charts['ch' + data.id].data.series[0].push(data.value);
+          charts['ch' + data.id].update();
+        }
+        break;
+
+      case UI_CHART_SET:
+        if(charts.hasOwnProperty('ch' + data.id)) {
+          var d = charts['ch' + data.id].data;
+          if(d.series[0].length > data.valueid) {
+            d.series[0][data.valueid] = data.value;
+          }
+          charts['ch' + data.id].update();
+        }
+        break;
+
       default:
         console.error("Unknown type or event");
         break;
@@ -565,7 +597,7 @@ function start() {
       processEnabled(data);
     }
 
-    if (data.type >= UPDATE_OFFSET && data.type < UI_INITIAL_GUI) {
+    if (data.type >= UPDATE_OFFSET && data.type < MAX_ID_OF_UPDATE_MESSAGES) {
       //An "update" message was just recieved and processed
       var element = $("#id" + data.id);
 
@@ -815,7 +847,7 @@ var elementHTML = function(data) {
       return "ACCEL // Not implemented fully!<div class='accelerometer' id='accel" + id +
         "' ><div class='ball" + id + "'></div><pre class='accelerometeroutput" + id + "'></pre>";
     case UI_CHART:
-      return "<div class='ct-chart' id='ch" + id + "'></div>";
+      return "<div class='ct-chart chart-card' id='ch" + id + "'></div>";
     default:
       return "";
   }
