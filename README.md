@@ -572,7 +572,7 @@ Note that this will have no effect on small screens.
 
 Charts are supported through the use of the [Chartist](https://gionkunz.github.io/chartist-js/index.html) library. You can create controls with line charts, bar charts, and pie charts. 
 
-You create a chart by creating a control of type ``ControlType::Chart` and passing as the control's value a JSON string with three keys, `type`, `data`, and `options`.
+You create a chart by creating a control of type `ControlType::Chart` and passing as the control's value a JSON string with three keys, `type`, `data`, and `options`.
 
  * `type`: Set to either `line`, `bar`, or `pie`
  * `data`: The initial chart data. Can be empty, otherwise see below for examples.
