@@ -40,7 +40,7 @@ The Library runs on any kind of **ESP8266** and **ESP32** (NodeMCU, AI Thinker, 
   * [Disabling Controls](#disabling-controls)
   * [Grouped controls](#grouped-controls)
   * [Wide controls](#wide-controls)
-  * [Graph (Experimental)](#graph--experimental-)
+  * [Charts](#charts)
 - [Notes for Development](#notes-for-development)
 - [Contribute](#contribute)
 
@@ -58,6 +58,7 @@ The Library runs on any kind of **ESP8266** and **ESP32** (NodeMCU, AI Thinker, 
 - Transport layer rework by @iangray001
 - Time control by @iangray001
 - Vertical controls by @iangray001
+- Charts by @iangray001
 
 ## Roadmap
 
@@ -565,16 +566,94 @@ This can be applied to every element to force a single column layout, or to indi
 Note that this will have no effect on small screens.
 
 
-### Graph (Experimental)
+### Charts
 
-![graph](docs/ui_graph.png)
+![Charts](docs/ui_charts.png)
 
-The graph widget can display graph points with timestamp at wich they arrive
+Charts are supported through the use of the [Chartist](https://gionkunz.github.io/chartist-js/index.html) library. You can create controls with line charts, bar charts, and pie charts. 
 
-Use `ESPUI.addGraphPoint(graphId, random(1, 50));` to add a new value at the current time, use `ESPUI.clearGraph(graphId)` to clear the entire graph.
-Graph points are saved in the browser in **localstorage** to be persistant, clear local storageto remove the points or use clearGraph() from a bbutton callback to provide a clear button.
+You create a chart by creating a control of type ``ControlType::Chart` and passing as the control's value a JSON string with three keys, `type`, `data`, and `options`.
 
-_There are many issues with the graph component currently and work is ongoing. Consider helping us out with development!_
+ * `type`: Set to either `line`, `bar`, or `pie`
+ * `data`: The initial chart data. Can be empty, otherwise see below for examples.
+ * `options`: The chart options, see examples below or for full listing see the [Chartist API](https://gionkunz.github.io/chartist-js/examples.html).
+
+For example:
+
+```
+static const String chartval = R"(
+  {
+      "type": "line", 
+      "data": {
+        "labels": ["9:00", "10:00", "11:00", "12:00", "1:00"], 
+        "series": [[5, 2, 4, 2, 0]]
+      }, 
+      "options": {"fullWidth": "true", "height": 350, "showArea": "true"}
+  })";
+
+chart1 = ESPUI.addControl(Chart, "A Chart", chartval, Carrot, 0);
+ESPUI.setPanelWide(chart1, true);
+```
+
+First, we define a constant string that we will need to initialise the chart. This example uses a [raw string literal](https://en.cppreference.com/w/cpp/language/string_literal) here because properly formatted JSON needs a lot of double quotes ("") and escaping them all would be messy.
+
+Observe how the `data` key is an object with two further keys, `labels`, and `series`. `labels` is an array of the X axis labels, and `series` is the corresponding Y values. Note that `series` is an array of arrays because Chartist supports multiple data series on the same chart. However ESPUI currently does not support this through its API so stick to using only one series. Finally we set some `options` from [Chartist's API](https://gionkunz.github.io/chartist-js/examples.html) to tweak the display. `height` is of particular interest to us as you can use this to set a good height for your use case and UI.
+
+This example also sets the chart to be a [wide control](#wide-controls). The result of this looks like the following:
+
+![Chart example](docs/ui_chart_example.png)
+
+#### Adding Chart Data
+
+Adding data points to a chart is as simple as:
+
+```
+ESPUI.chartAddValue(chart1, String(random(0, 10)), "Label");
+```
+
+The second parameter is the X value as a string, but will be interpreted by Chartist as a number. Integers and floating point values can be used. The third parameter is the label which should appear on the Y axis.
+
+You can build your entire chart this way, but there are some addtional parameters that are useful for specific use cases.
+
+```
+ESPUI.chartAddValue(chart1, String(random(0, 10)), "Label", 15);
+```
+
+This is the same example as before, but we have now specified an optional fourth parameter. This tells ESPUI to ensure that the chart only ever contains at most this many data items. Older items will be automatically removed. This is useful for long-running data logging where you only want to display the last _n_ elements. If this parameter is <1 then it is ignored.
+
+Finally, for logging time series data it is useful to be able to label the Y axis with the time and/or date. You can use a formatted string to do this automatically without working it out yourself. For example:
+
+```
+ESPUI.chartAddValue(chart1, String(random(0, 10)), "", 0, "%H:%M:%S");
+```
+
+This adds a data point labelled with the current hour, minutes, and seconds, i.e. `12:45:16`. For the full range of formatting options available, [see this page](https://thdoan.github.io/strftime/). Unfortunately, due to the extremely large size of localisation files, only English-speaking locales are supported when using things like `%A - Full name of the day of the week`.
+
+#### Changing Chart Data
+
+Clearing an existing chart is as simple as:
+
+```
+ESPUI.chartClear(chart1);
+```
+
+You can also edit a specific chart data point. For example:
+
+```
+ESPUI.chartSetValue(chart1, 2, String(10));
+```
+
+This will set data element 2 (so the third value visible in the chart) to 10. This is likely not very useful for line charts, but allows for bar charts and pie charts to be used as dynamic visualisations.
+
+#### Saving and Loading Chart Data
+
+Whilst you can manually store any data in the ESP's non-volatile EEPROM and use that to reinitialise any charts, it is also possible to request that the browser store the current data in browser local storage. The chart can be restored from this at any time. Browser local storage is, as the name implies, local to the specific browser so is not in any way synchronised between clients. However for things like a permanent data logger this can be used to keep historical data without any additional work. The functions to do this are simply:
+
+```
+ESPUI.chartSave(chart1);
+ESPUI.chartLoad(chart1);
+```
+
 
 # Notes for Development
 

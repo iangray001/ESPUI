@@ -80,6 +80,8 @@ enum ControlType : uint8_t
     ChartClear = 180,
     ChartAdd = 181,
     ChartSet = 182,
+    ChartSave = 183,
+    ChartLoad = 184,
 
     InitialGui = 200,
     Reload = 201,
@@ -303,9 +305,11 @@ public:
     void updateVisibility(uint16_t id, bool visibility, int clientId = -1);
 
     //Charting functions
-    void chartAddValue(uint16_t id, const String& value, const String& label, int clientId = -1);
+    void chartAddValue(uint16_t id, const String& value, const String& label, int maxVals = -1, const String& timeFormat = "", int clientId = -1);
     void chartSetValue(uint16_t id, uint16_t valueId, const String& value, int clientId = -1);
     void chartClear(uint16_t id, int clientId = -1);
+    void chartSave(uint16_t id, int clientId = -1);
+    void chartLoad(uint16_t id, int clientId = -1);
 
     // Variables
     const char* ui_title = "ESPUI"; // Store UI Title and Header Name
@@ -327,6 +331,7 @@ private:
 
     void prepareJSONChunk(AsyncWebSocketClient* client, uint16_t startindex, JsonArray* items);
     void sendToClients(String& json, int clientId);
+    void sendBasicMessage(uint16_t id, ControlType messageType, int clientId);
 };
 
 extern ESPUIClass ESPUI;

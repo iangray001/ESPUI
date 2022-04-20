@@ -786,22 +786,36 @@ void ESPUIClass::updateControl(Control* control, int clientId)
 }
 
 
-void ESPUIClass::chartClear(uint16_t id, int clientId)
-{
+void ESPUIClass::sendBasicMessage(uint16_t id, ControlType messageType, int clientId) {
     Control* control = getControl(id);
     if (control && control->type == ControlType::Chart) 
     {
         String json;
         DynamicJsonDocument document(jsonUpdateDocumentSize);
         JsonObject root = document.to<JsonObject>();
-        root["type"] = ControlType::ChartClear;
+        root["type"] = messageType;
         root["id"] = control->id;
         serializeJson(document, json);
         sendToClients(json, clientId);
     }
 }
 
-void ESPUIClass::chartAddValue(uint16_t id, const String& value, const String& label, int clientId)
+void ESPUIClass::chartClear(uint16_t id, int clientId)
+{
+    sendBasicMessage(id, ControlType::ChartClear, clientId);
+}
+
+void ESPUIClass::chartSave(uint16_t id, int clientId)
+{
+    sendBasicMessage(id, ControlType::ChartSave, clientId);
+}
+
+void ESPUIClass::chartLoad(uint16_t id, int clientId)
+{
+    sendBasicMessage(id, ControlType::ChartLoad, clientId);
+}
+
+void ESPUIClass::chartAddValue(uint16_t id, const String& value, const String& label, int maxVals, const String& timeFormat, int clientId)
 {
     Control* control = getControl(id);
     if (control && control->type == ControlType::Chart) 
@@ -813,6 +827,8 @@ void ESPUIClass::chartAddValue(uint16_t id, const String& value, const String& l
         root["id"] = control->id;
         root["value"] = value;
         root["label"] = label;
+        if(maxVals > 0) root["maxVals"] = maxVals;
+        if(timeFormat != "") root["timeFormat"] = timeFormat;
         serializeJson(document, json);
         sendToClients(json, clientId);
     }
