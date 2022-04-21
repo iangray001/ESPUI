@@ -149,16 +149,30 @@ frontend is based on [Skeleton CSS](http://getskeleton.com/) and jQuery-like
 lightweight [zepto.js](https://zeptojs.com/) for handling events. The
 communication between the ESP and the client browser works using web
 sockets. ESPUI does not need network access and can be used in standalone access
-point mode, all resources are loaded directly from the ESPs memory.
+point mode, all resources are loaded directly from the ESP's memory.
 
-This section will explain in detail how the Library is to be used from the
-Arduino code side. In the arduino `setup()` routine the interface can be customised by adding UI Elements.
-This is done by calling the corresponding library methods on the Library object
-`ESPUI`. Eg: `ESPUI.button("button", &myCallback);` creates a button in the
-interface that calls the `myCallback(Control *sender, int value)` function when changed. All buttons and
-items call their callback whenever there is a state change from them. This means
-the button will call the callback when it is pressed and also again when it is
-released. To separate different events an integer number with the event name is
+The use of this library is simple. In either your application start up, or your Arduino `setup()` routine, 
+you describe your interface by repeatedly calling the `addControl()` function, to add buttons, sliders etc.
+
+```
+ESPUI.addControl(Button, "Button", "Button 1", Carrot, maintab, myCallback);
+```
+
+The above will create a button in the interface called "Button" to that calls the `myCallback(Control *sender, int value)` function when pressed. It will be "carrot" coloured and added to the `maintab` tab in the UI. However, if you are just starting out then a range of shortcut functions exist to create a simple UI with only the essential parameters:
+
+```
+ESPUI.button("Button", &myCallback);
+```
+
+When you have finished setting up the UI call:
+
+```
+ESPUI.begin();
+```
+
+All buttons and other controls fire their callback whenever their state changes. This means
+the button will fire the callback when it is pressed, and also again when it is
+released. To separate different events an integer with the event name is
 passed to the callback function that can be handled in a `switch(){}case{}`
 statement.
 
